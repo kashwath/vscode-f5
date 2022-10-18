@@ -155,9 +155,9 @@ export async function activateInternal(context: ExtensionContext) {
 
 
 
-	
-	
-	
+
+
+
 	/**
 	 * ###########################################################################
 	 * 
@@ -886,6 +886,89 @@ export async function activateInternal(context: ExtensionContext) {
 
 			if (resp) {
 				return ext.panel.render(resp);
+			}
+		}
+
+	}));
+
+
+	/*
+		Creates APM policy with the text selected on the editor
+	*/
+	context.subscriptions.push(commands.registerCommand('apm.makeRequest', async () => {
+		/**
+		 * make open/raw https call
+		 * 
+		 */
+		logger.debug('executing apm.makeRequest');
+		const editor = window.activeTextEditor;
+		let resp;
+		if (editor) {
+			// var text: any = editor.document.getText(editor.selection);	// highlighted text
+			var text: any = await getText();
+			if (utils.isValidJson(text)) {
+				logger.debug('JSON detected -> parsing');
+				text = JSON.parse(text);
+				
+				//Get user input: IP address
+				const ip_address = await window.showInputBox({
+					placeHolder: "BIG-IP Next IP Address",
+					prompt: "Enter IP Address",
+				});
+				//Get user input: username
+				const uname = await window.showInputBox({
+					placeHolder: "Basic Auth username",
+					prompt: "Enter Basic Auth username",
+				});
+				//Get user input: password
+				const pass = await window.showInputBox({
+					placeHolder: "Basic Auth password",
+					prompt: "Enter Basic Auth password",
+				});
+
+
+				resp = await window.withProgress({
+					location: ProgressLocation.Notification,
+					title: `Making API Request`,
+					cancellable: true
+				}, async (progress, token) => {
+					token.onCancellationRequested(() => {
+						// this logs but doesn't actually cancel...
+						logger.debug("User canceled API Request");
+						return new Error(`User canceled API Request`);
+					});
+
+					logger.debug('generic https f5 call -> ', text);
+
+					//Make API call to login API and fetch token
+					return await ext.extHttp.makeRequest({
+						method: 'GET',
+						url: `https://${ip_address}:5443/api/v1/login`,
+						auth: {
+							username: uname!,
+							password: pass!
+						}
+					})
+						.then(async (resp) => {
+							logger.debug(resp.data)
+							let token = resp.data.token;
+							
+							//Create APM policy with text selected on the editor
+							await ext.extHttp.makeRequest({
+								method: 'PUT',
+								url: `https://${ip_address}:5443/api/v1/access-policies`,
+								data: text,
+								headers: {
+									Authorization: `Bearer ${token}`
+								}
+							}).then((policyResp) => {
+								logger.debug(policyResp.data)
+							})
+						})
+						.catch((err) => {
+							logger.error(err)
+						})
+				});
 			}
 		}
 
