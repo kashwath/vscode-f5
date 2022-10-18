@@ -480,6 +480,11 @@
 				"category": "F5"
 			},
 			{
+				"command": "apm.makeRequest",
+				"title": "Create APM Policy",
+				"category": "F5"
+			},
+			{
 				"command": "f5.cfgExplore",
 				"title": "Explore TMOS Config",
 				"category": "F5"
@@ -833,6 +838,11 @@
 				{
 					"when": "editorHasSelection",
 					"command": "f5.makeRequest",
+					"group": "F5"
+				},
+				{
+					"when": "editorHasSelection",
+					"command": "apm.makeRequest",
 					"group": "F5"
 				},
 				{
