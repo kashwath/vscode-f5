@@ -10,7 +10,6 @@ import {
 
 import { ext } from '../extensionVariables';
 
-
 export class ExampleDecsProvider implements TreeDataProvider<ExampleDec> {
 
 	private _onDidChangeTreeData: EventEmitter<ExampleDec | undefined> = new EventEmitter<ExampleDec | undefined>();
@@ -264,6 +263,86 @@ export class ExampleDecsProvider implements TreeDataProvider<ExampleDec> {
 		return Promise.resolve(treeItems);
 	}
 }
+
+
+export class apmPolicyDecsProvider implements TreeDataProvider<ExampleDec> {
+
+	private _onDidChangeTreeData: EventEmitter<ExampleDec | undefined> = new EventEmitter<ExampleDec | undefined>();
+	readonly onDidChangeTreeData: Event<ExampleDec | undefined> = this._onDidChangeTreeData.event;
+
+	constructor() {
+	}
+
+	refresh(): void {
+		this._onDidChangeTreeData.fire(undefined);
+	}
+
+	getTreeItem(element: ExampleDec): TreeItem {
+		return element;
+	}
+
+	async getChildren(element?: ExampleDec): Promise<ExampleDec[]> {
+
+		var accessPolicies: any[] = []
+		var treeItems: any[] | PromiseLike<any[]> = [];
+		await ext.extHttp.makeRequest({
+			method: 'GET',
+			//enter IP address and credentials here
+			url: `https://${ip}:5443/api/v1/login`,
+			auth: {
+				username: 'username',
+				password: 'password'
+			}
+		})
+
+			.then(async (resp) => {
+				let token = resp.data.token;
+				await ext.extHttp.makeRequest({
+					method: 'GET',
+					url: `https://${ip}:5443/api/v1/access-policies`,
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				}).then(apmpolicies => {
+					accessPolicies = apmpolicies.data._embedded.accessPolicies;
+				})
+			});
+
+		if (element) {
+			if (element.label === 'APM Policies') {
+				treeItems = accessPolicies.map((item: any) => {
+					return new ExampleDec(
+						item.name,
+						'',
+						TreeItemCollapsibleState.None,
+						{
+							command: 'f5.apmPolicyDisplay',
+							title: '',
+							arguments: [item]
+						}
+					);
+				});
+			}
+		}
+		else {
+			treeItems.push(
+				new ExampleDec(
+					'APM Policies',
+					'APM examples direct from f5devcentral/vscode-f5-apm repo',
+					TreeItemCollapsibleState.Collapsed,
+					{
+						command: 'vscode.open',
+						title: '',
+						// change url to when moved to F5Networks repo
+						arguments: [Uri.parse('https://github.com/f5devcentral/vscode-f5-apm/tree/main/examples')]
+					}
+				)
+			);
+		}
+		return Promise.resolve(treeItems);
+	}
+}
+
 
 
 export class ExampleDec extends TreeItem {

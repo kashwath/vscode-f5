@@ -33,7 +33,7 @@ import * as fs from 'fs';
 import * as keyTarType from 'keytar';
 import * as os from 'os';
 
-import { ExampleDecsProvider } from './treeViewsProviders/githubDecExamples';
+import { ExampleDecsProvider, apmPolicyDecsProvider } from './treeViewsProviders/githubDecExamples';
 import { FastTemplatesTreeProvider } from './treeViewsProviders/fastTreeProvider';
 
 import * as utils from './utils/utils';
@@ -674,6 +674,11 @@ export async function activateInternal(context: ExtensionContext) {
 			.catch(err => logger.error(err));
 	}));
 
+	context.subscriptions.push(commands.registerCommand('f5.apmPolicyDisplay', async (policy) => {
+
+		ext.telemetry.capture({ command: 'f5.apmPolicyDisplay' });
+		ext.panel.render(policy)
+	}));
 
 
 
@@ -697,6 +702,7 @@ export async function activateInternal(context: ExtensionContext) {
 
 	// register example delarations tree
 	window.registerTreeDataProvider('decExamples', new ExampleDecsProvider());
+	window.registerTreeDataProvider('apmPolicies', new apmPolicyDecsProvider());
 
 
 	context.subscriptions.push(commands.registerCommand('f5.jsonYmlConvert', async () => {
