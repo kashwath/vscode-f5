@@ -185,6 +185,10 @@
 					"name": "Documentation/Examples"
 				},
 				{
+					"id": "apmPolicies",
+					"name": "APM"
+				},
+				{
 					"id": "cfgTree",
 					"name": "Config Explorer"
 				}
