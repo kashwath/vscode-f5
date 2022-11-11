@@ -282,13 +282,12 @@ export class apmPolicyDecsProvider implements TreeDataProvider<ExampleDec> {
 	}
 
 	async getChildren(element?: ExampleDec): Promise<ExampleDec[]> {
-
-		var accessPolicies: any[] = []
+		var accessPolicies: any[] = [];
 		var treeItems: any[] | PromiseLike<any[]> = [];
 		await ext.extHttp.makeRequest({
 			method: 'GET',
 			//enter IP address and credentials here
-			url: `https://${ip}:5443/api/v1/login`,
+			url: `https://0.0.0.0:5443/api/v1/login`,
 			auth: {
 				username: 'username',
 				password: 'password'
@@ -299,7 +298,7 @@ export class apmPolicyDecsProvider implements TreeDataProvider<ExampleDec> {
 				let token = resp.data.token;
 				await ext.extHttp.makeRequest({
 					method: 'GET',
-					url: `https://${ip}:5443/api/v1/access-policies`,
+					url: `https://0.0.0.0:5443/api/v1/access-policies`,
 					headers: {
 						Authorization: `Bearer ${token}`
 					}

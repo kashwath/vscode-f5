@@ -489,7 +489,7 @@
 			},
 			{
 				"command": "apm.makeRequest",
-				"title": "Create APM Policy",
+				"title": "Create/Edit APM Policy",
 				"category": "F5"
 			},
 			{

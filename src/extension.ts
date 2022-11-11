@@ -690,7 +690,6 @@ export async function activateInternal(context: ExtensionContext) {
 	}));
 
 	context.subscriptions.push(commands.registerCommand('f5.apmPolicyDisplay', async (policy) => {
-
 		ext.telemetry.capture({ command: 'f5.apmPolicyDisplay' });
 		ext.panel.render(policy)
 	}));
@@ -942,23 +941,6 @@ export async function activateInternal(context: ExtensionContext) {
 			if (utils.isValidJson(text)) {
 				logger.debug('JSON detected -> parsing');
 				text = JSON.parse(text);
-				
-				//Get user input: IP address
-				const ip_address = await window.showInputBox({
-					placeHolder: "BIG-IP Next IP Address",
-					prompt: "Enter IP Address",
-				});
-				//Get user input: username
-				const uname = await window.showInputBox({
-					placeHolder: "Basic Auth username",
-					prompt: "Enter Basic Auth username",
-				});
-				//Get user input: password
-				const pass = await window.showInputBox({
-					placeHolder: "Basic Auth password",
-					prompt: "Enter Basic Auth password",
-				});
-
 
 				resp = await window.withProgress({
 					location: ProgressLocation.Notification,
@@ -976,27 +958,48 @@ export async function activateInternal(context: ExtensionContext) {
 					//Make API call to login API and fetch token
 					return await ext.extHttp.makeRequest({
 						method: 'GET',
-						url: `https://${ip_address}:5443/api/v1/login`,
+						url: `https://0.0.0.0:5443/api/v1/login`,
 						auth: {
-							username: uname!,
-							password: pass!
+							username: 'username',
+							password: 'password'
 						}
 					})
 						.then(async (resp) => {
 							logger.debug(resp.data)
 							let token = resp.data.token;
-							
-							//Create APM policy with text selected on the editor
-							await ext.extHttp.makeRequest({
-								method: 'PUT',
-								url: `https://${ip_address}:5443/api/v1/access-policies`,
-								data: text,
-								headers: {
-									Authorization: `Bearer ${token}`
-								}
-							}).then((policyResp) => {
-								logger.debug(policyResp.data)
-							})
+
+							if (text.id) {
+								// edit case
+								let policy_id = text.id;
+								
+								//clean up policy for edit 
+								delete text.id;
+								delete text._links;
+
+								//make put request
+								await ext.extHttp.makeRequest({
+									method: 'PUT',
+									url: `https://0.0.0.0:5443/api/v1/access-policies/${policy_id}`,
+									data: text,
+									headers: {
+										Authorization: `Bearer ${token}`
+									}
+								}).then((policyResp) => {
+									logger.debug(policyResp.data)
+								})
+							} else {
+								//Create APM policy with text selected on the editor
+								await ext.extHttp.makeRequest({
+									method: 'PUT',
+									url: `https://0.0.0.0:5443/api/v1/access-policies`,
+									data: text,
+									headers: {
+										Authorization: `Bearer ${token}`
+									}
+								}).then((policyResp) => {
+									logger.debug(policyResp.data)
+								})
+							}
 						})
 						.catch((err) => {
 							logger.error(err)
