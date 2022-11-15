@@ -318,7 +318,8 @@ export class apmPolicyDecsProvider implements TreeDataProvider<ExampleDec> {
 							command: 'f5.apmPolicyDisplay',
 							title: '',
 							arguments: [item]
-						}
+						},
+						'apmPolicy'
 					);
 				});
 			}
@@ -340,6 +341,52 @@ export class apmPolicyDecsProvider implements TreeDataProvider<ExampleDec> {
 		}
 		return Promise.resolve(treeItems);
 	}
+
+	/**
+     * delete Access policy
+     * 
+     * @param policy extracts policy id from tree class item (ExampleDec)
+    */
+	async deletePolicy(policy: ExampleDec): Promise<void> {
+
+        const id = policy?.command?.arguments?.[0].id;
+		await ext.extHttp.makeRequest({
+			method: 'GET',
+			//enter IP address and credentials here
+			url: `https://0.0.0.0:5443/api/v1/login`,
+			auth: {
+				username: 'username',
+				password: 'password'
+			}
+		})
+
+			.then(async (resp) => {
+				let token = resp.data.token;
+				await ext.extHttp.makeRequest({
+					method: 'DELETE',
+					url: `https://0.0.0.0:5443/api/v1/access-policies/${id}`,
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				})
+				.then(async (resp) => {
+					let jobId = resp.data.id;
+					await ext.extHttp.makeRequest({
+						method: 'GET',
+						url: `https://0.0.0.0:5443/api/v1/jobs/${jobId}`,
+						headers: {
+							Authorization: `Bearer ${token}`
+						}
+					})
+					.then(async (resp) => {
+						let status = resp.data.status;
+						if (status !== "SUCCEEDED"){
+							throw new Error("Deleting apm policy failed.");
+						}
+				});
+				});
+			});
+    }
 }
 
 
@@ -349,7 +396,8 @@ export class ExampleDec extends TreeItem {
 		public readonly label: string,
 		public tooltip: string,
 		public readonly collapsibleState: TreeItemCollapsibleState,
-		public readonly command?: Command
+		public readonly command?: Command,
+		public contextValue?: string
 	) {
 		super(label, collapsibleState);
 	}

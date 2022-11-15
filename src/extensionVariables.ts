@@ -34,6 +34,7 @@ import { EventEmitter } from "events";
 import { F5Client } from "./f5Client";
 import { AtcVersions, AtcVersionsClient, ExtHttp } from 'f5-conx-core';
 import { AS3TreeProvider } from './treeViewsProviders/as3TreeProvider';
+import { apmPolicyDecsProvider } from './treeViewsProviders/githubDecExamples';
 import { F5TreeProvider } from './treeViewsProviders/hostsTreeProvider';
 import { Telemetry } from './telemetry';
 import { XcDiag } from './tmosXcDiag';
@@ -51,6 +52,7 @@ export namespace ext {
     export let keyTar: KeyTar;
     export let hostsTreeProvider: F5TreeProvider;
     export let telemetry: Telemetry;
+    export let apmTree: apmPolicyDecsProvider;
     export let as3Tree: AS3TreeProvider;
     export let xcDiag: XcDiag;
     export let eventEmitterGlobal: EventEmitter;

@@ -493,6 +493,12 @@
 				"category": "F5"
 			},
 			{
+				"command": "apm.deletePolicy",
+				"title": "Delete Access Policy",
+				"category": "F5",
+				"icon": "$(trash)"
+			},
+			{
 				"command": "f5.cfgExplore",
 				"title": "Explore TMOS Config",
 				"category": "F5"
@@ -1344,6 +1350,11 @@
 				{
 					"command": "f5-as3.deleteTenant",
 					"when": "view == as3Tenants && viewItem == as3Tenant"
+				},
+				{
+					"command": "apm.deletePolicy",
+					"group": "inline",
+					"when": "view == apmPolicies && viewItem == apmPolicy"
 				}
 			]
 		}
