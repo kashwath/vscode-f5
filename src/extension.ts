@@ -138,6 +138,8 @@ export async function activateInternal(context: ExtensionContext) {
 
 	new CfCore(context);
 
+	// setting up apm tree
+	ext.apmTree = new apmPolicyDecsProvider();
 
 	// or do we prefer the function style of importing core blocks?
 
@@ -693,6 +695,12 @@ export async function activateInternal(context: ExtensionContext) {
 		ext.telemetry.capture({ command: 'f5.apmPolicyDisplay' });
 		ext.panel.render(policy)
 	}));
+	context.subscriptions.push(commands.registerCommand('apm.deletePolicy', async (policy) => {
+
+		ext.telemetry.capture({ command: 'apm.deletePolicy' });
+		await ext.apmTree.deletePolicy(policy)
+		.catch(err => logger.error('apm.deletePolicy failed with', err));
+    }));
 
 
 
